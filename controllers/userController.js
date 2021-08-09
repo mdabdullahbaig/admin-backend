@@ -2,8 +2,12 @@ const mongoose = require("mongoose");
 
 const User = require("../models/user");
 
-const createUser = async (req, res) => {
+const signup = async (req, res, next) => {
   console.log("user created");
+};
+
+const login = async (req, res, next) => {
+  const { email, password } = req.body;
 };
 
 const getUsers = async (req, res, next) => {
@@ -11,5 +15,15 @@ const getUsers = async (req, res, next) => {
   return res.send({ mess: "hello" });
 };
 
-exports.createUser = createUser;
+const getUserById = async (req, res, next) => {};
+
+const updateUserById = async (req, res, next) => {};
+
+const deleteUserById = async (req, res, next) => {};
+
+exports.signup = signup;
+exports.login = login;
 exports.getUsers = getUsers;
+exports.getUserById = getUserById;
+exports.updateUserById = updateUserById;
+exports.deleteUserById = deleteUserById;

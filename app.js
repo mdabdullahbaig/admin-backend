@@ -8,11 +8,15 @@ const app = express();
 
 const PORT = process.env.PORT || 3000;
 
-//It parses incoming requests with JSON payloads and is based on body-parser.
+// This is a built-in middleware function in Express.
+// It parses incoming requests with JSON payloads and is based on body-parser.
 app.use(express.json());
+
+// It parses incoming requests with urlencoded payloads and is based on body-parser.
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
+// Route middleware
 app.use("/api/users", userRoute);
 
 app.use((req, res, next) => {
@@ -20,6 +24,7 @@ app.use((req, res, next) => {
   next(error);
 });
 
+// Error handling middleware
 app.use((error, req, res, next) => {
   if (res.headerSent) {
     return next(error);
