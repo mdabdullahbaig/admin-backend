@@ -2,7 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const HttpError = require("./util/HttpError");
-const userRoute = require("./routes/userRoute");
+const userRoute = require("./routes/user-route");
 
 const app = express();
 
