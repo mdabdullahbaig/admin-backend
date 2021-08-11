@@ -1,4 +1,6 @@
-const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+
 const User = require("../models/user");
 const HttpError = require("../util/HttpError");
 const { signupSchema } = require("../util/joiSchema");
@@ -32,11 +34,23 @@ const signupUser = async (req, res, next) => {
     return next(error);
   }
 
+  let hashedPassword;
+
+  try {
+    hashedPassword = await bcrypt.hash(password, 12);
+  } catch (err) {
+    const error = new HttpError(
+      "Signing up failed, please try again later.",
+      500
+    );
+    return next(error);
+  }
+
   const createdUser = new User({
     firstName,
     lastName,
     email,
-    password,
+    password: hashedPassword,
   });
 
   try {
@@ -49,7 +63,25 @@ const signupUser = async (req, res, next) => {
     return next(error);
   }
 
-  res.status(201).json({ user: createdUser.toObject({ getters: true }) });
+  let token;
+
+  try {
+    token = jwt.sign(
+      { userId: createdUser.id, email: createdUser.email },
+      "supersecret_dont_share",
+      { expiresIn: "1h" }
+    );
+  } catch (err) {
+    const error = new HttpError(
+      "Signing up failed, please try again later.",
+      500
+    );
+    return next(error);
+  }
+
+  return res
+    .status(201)
+    .json({ userId: createdUser.id, email: createdUser.email, token });
 };
 
 const loginUser = async (req, res, next) => {
@@ -73,7 +105,7 @@ const loginUser = async (req, res, next) => {
     return next(error);
   }
 
-  if (!existingUser || existingUser.password !== password) {
+  if (!existingUser) {
     const error = new HttpError(
       "Invalid creadentials, could not log you in.",
       401
@@ -81,10 +113,49 @@ const loginUser = async (req, res, next) => {
     return next(error);
   }
 
-  return res.json({ message: "Logged In!" });
+  let isValidPassword = false;
+
+  try {
+    isValidPassword = await bcrypt.compare(password, existingUser.password);
+  } catch (err) {
+    const error = new HttpError(
+      "Login is failed, please try again later.",
+      500
+    );
+    return next(error);
+  }
+
+  if (!isValidPassword) {
+    const error = new HttpError("Password is not correct.", 500);
+    return next(error);
+  }
+
+  let token;
+
+  try {
+    token = jwt.sign(
+      { userId: existingUser.id, email: existingUser.email },
+      "supersecret_dont_share",
+      { expiresIn: "1h" }
+    );
+  } catch (err) {
+    const error = new HttpError(
+      "Login is failed, please try again later.",
+      500
+    );
+    return next(error);
+  }
+
+  return res
+    .status(201)
+    .json({ userId: createdUser.id, email: createdUser.email, token });
 };
 
 const getUsers = async (req, res, next) => {
+  try {
+  } catch (err) {
+    const error = new HttpError("Something went wrong.", 500);
+  }
   console.log("getting users");
   return res.send({ mess: "hello" });
 };
