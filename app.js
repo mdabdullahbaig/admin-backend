@@ -2,7 +2,9 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const HttpError = require("./util/HttpError");
+const authRoute = require("./routes/auth-route");
 const userRoute = require("./routes/user-route");
+const { databaseInfo } = require("./config/local");
 
 const app = express();
 
@@ -17,6 +19,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
 // Route middleware
+app.use("/api/auth", authRoute);
 app.use("/api/users", userRoute);
 
 app.use((req, res, next) => {
@@ -33,20 +36,13 @@ app.use((error, req, res, next) => {
   res.json({ message: error.message || "An unknown error occured!" });
 });
 
-// mongoose
-//   .connect("mongodb://localhost:27017/ecommercedb", {
-//     useNewUrlParser: true,
-//     useUnifiedTopology: true,
-//   })
-//   .then(() => {
-//     console.log("ecommercedb database has been connected.");
-//     app.listen(PORT);
-//     console.log(`Server is running on ${PORT}`);
-//   })
-//   .catch((err) => {
-//     console.log(err);
-//   });
-
-app.listen(PORT, () => {
-  console.log(`Server is running on ${PORT}`);
-});
+mongoose
+  .connect(databaseInfo.db_url, databaseInfo.db_callback)
+  .then(() => {
+    console.info("Database has been connected.");
+    app.listen(PORT);
+    console.log(`Server is running on ${PORT}`);
+  })
+  .catch((err) => {
+    console.error(err);
+  });

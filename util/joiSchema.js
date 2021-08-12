@@ -14,3 +14,4 @@ const loginSchema = Joi.object({
 });
 
 exports.signupSchema = signupSchema;
+exports.loginSchema = loginSchema;

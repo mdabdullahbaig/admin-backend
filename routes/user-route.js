@@ -1,8 +1,7 @@
 const express = require("express");
+
 const {
-  signupUser,
   getUsers,
-  loginUser,
   getUserById,
   updateUserById,
   deleteUserById,
@@ -11,10 +10,6 @@ const {
 const router = express.Router();
 
 router.get("/", getUsers);
-
-router.post("/signup", signupUser);
-
-router.post("/login", loginUser);
 
 router.get("/:id", getUserById);
 
