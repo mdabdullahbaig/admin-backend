@@ -4,6 +4,7 @@ const cors = require("cors");
 const HttpError = require("./util/HttpError");
 const authRoute = require("./routes/auth-route");
 const userRoute = require("./routes/user-route");
+const productRoute = require("./routes/product-route");
 const { databaseInfo } = require("./config/local");
 
 const app = express();
@@ -21,10 +22,11 @@ app.use(cors());
 // Route middleware
 app.use("/api/auth", authRoute);
 app.use("/api/users", userRoute);
+app.use("/api/products", productRoute);
 
 app.use((req, res, next) => {
   const error = new HttpError("Something went wrong.", 500);
-  next(error);
+  return next(error);
 });
 
 // Error handling middleware

@@ -13,5 +13,11 @@ const loginSchema = Joi.object({
   password: Joi.string().min(6).required().trim(),
 });
 
+const updateUserSchema = Joi.object({
+  firstName: Joi.string().required().trim(),
+  lastName: Joi.string().required().trim(),
+});
+
 exports.signupSchema = signupSchema;
 exports.loginSchema = loginSchema;
+exports.updateUserSchema = updateUserSchema;
