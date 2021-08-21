@@ -3,6 +3,13 @@ const HttpError = require("../util/HttpError");
 const { updateUserSchema } = require("../util/joiSchema");
 
 const getUsers = async (req, res, next) => {
+  if (!req.currentUser.isAdmin) {
+    const error = new HttpError(
+      "Fetching users failed, please try again later.",
+      500
+    );
+    return next(error);
+  }
   let users;
 
   try {
@@ -22,6 +29,17 @@ const getUsers = async (req, res, next) => {
 
 const getUserById = async (req, res, next) => {
   const { id } = req.params;
+  console.log(req.currentUser.userId);
+  console.log(id);
+
+  if (req.currentUser.userId !== id) {
+    const error = new HttpError(
+      "Could not find a user for the provided id.",
+      404
+    );
+    return next(error);
+  }
+
   let user;
 
   try {
@@ -36,7 +54,7 @@ const getUserById = async (req, res, next) => {
 
   if (!user) {
     const error = new HttpError(
-      "Could not find a place for the provided id.",
+      "Could not find a user for the provided id.",
       404
     );
     return next(error);

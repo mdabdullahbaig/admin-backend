@@ -1,4 +1,5 @@
 const express = require("express");
+const auth = require("../middleware/auth");
 
 const {
   getUsers,
@@ -9,9 +10,9 @@ const {
 
 const router = express.Router();
 
-router.get("/", getUsers);
+router.get("/", auth, getUsers);
 
-router.get("/:id", getUserById);
+router.get("/:id", auth, getUserById);
 
 router.patch("/:id", updateUserById);
 

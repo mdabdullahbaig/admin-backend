@@ -18,6 +18,15 @@ const updateUserSchema = Joi.object({
   lastName: Joi.string().required().trim(),
 });
 
+const productSchema = Joi.object({
+  name: Joi.string().required().trim(),
+  description: Joi.string().required().trim(),
+  sellPrice: Joi.number().required(),
+  buyPrice: Joi.number().required(),
+  maxRetailPrice: Joi.number().required(),
+});
+
 exports.signupSchema = signupSchema;
 exports.loginSchema = loginSchema;
 exports.updateUserSchema = updateUserSchema;
+exports.productSchema = productSchema;

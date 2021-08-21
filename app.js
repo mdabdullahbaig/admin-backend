@@ -11,6 +11,11 @@ const app = express();
 
 const PORT = process.env.PORT || 3000;
 
+// middleware when site is down
+// app.use((req, res, next) => {
+//   res.status(503).send("Site is currently down, Check back soon.");
+// });
+
 // This is a built-in middleware function in Express.
 // It parses incoming requests with JSON payloads and is based on body-parser.
 app.use(express.json());

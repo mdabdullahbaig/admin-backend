@@ -1,10 +1,7 @@
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-
+const moment = require("moment");
 const User = require("../../models/user");
 const HttpError = require("../../util/HttpError");
 const { signupSchema } = require("../../util/joiSchema");
-const { tokenInfo, hashPasswordInfo } = require("../../config/local");
 
 const signup = async (req, res, next) => {
   try {
@@ -35,23 +32,14 @@ const signup = async (req, res, next) => {
     return next(error);
   }
 
-  let hashedPassword;
-
-  try {
-    hashedPassword = await bcrypt.hash(password, hashPasswordInfo.saltRounds);
-  } catch (err) {
-    const error = new HttpError(
-      "Signing up failed, please try again later.",
-      500
-    );
-    return next(error);
-  }
-
   const createdUser = new User({
     firstName,
     lastName,
     email,
-    password: hashedPassword,
+    password,
+    createdAt: moment().unix(),
+    updatedAt: moment().unix(),
+    isAdmin: true,
   });
 
   try {
@@ -64,25 +52,9 @@ const signup = async (req, res, next) => {
     return next(error);
   }
 
-  let token;
+  const token = createdUser.generateAuthToken();
 
-  try {
-    token = jwt.sign(
-      { userId: createdUser.id, email: createdUser.email },
-      tokenInfo.secret,
-      { expiresIn: tokenInfo.expiration }
-    );
-  } catch (err) {
-    const error = new HttpError(
-      "Signing up failed, please try again later.",
-      500
-    );
-    return next(error);
-  }
-
-  return res
-    .status(201)
-    .json({ userId: createdUser.id, email: createdUser.email, token });
+  return res.status(201).json({ token });
 };
 
 exports.signup = signup;

@@ -1,10 +1,7 @@
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-
 const User = require("../../models/user");
 const HttpError = require("../../util/HttpError");
 const { loginSchema } = require("../../util/joiSchema");
-const { tokenInfo } = require("../../config/local");
 
 const login = async (req, res, next) => {
   try {
@@ -52,25 +49,9 @@ const login = async (req, res, next) => {
     return next(error);
   }
 
-  let token;
+  const token = existingUser.generateAuthToken();
 
-  try {
-    token = jwt.sign(
-      { userId: existingUser.id, email: existingUser.email },
-      tokenInfo.secret,
-      { expiresIn: tokenInfo.expiration }
-    );
-  } catch (err) {
-    const error = new HttpError(
-      "Login is failed, please try again later.",
-      500
-    );
-    return next(error);
-  }
-
-  return res
-    .status(201)
-    .json({ userId: existingUser.id, email: existingUser.email, token });
+  return res.status(201).json({ token });
 };
 
 exports.login = login;
