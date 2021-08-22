@@ -14,8 +14,8 @@ router.get("/", auth, getUsers);
 
 router.get("/:id", auth, getUserById);
 
-router.patch("/:id", updateUserById);
+router.patch("/:id", auth, updateUserById);
 
-router.delete("/:id", deleteUserById);
+router.delete("/:id", auth, deleteUserById);
 
 module.exports = router;

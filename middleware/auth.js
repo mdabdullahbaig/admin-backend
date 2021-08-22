@@ -18,7 +18,7 @@ const auth = async (req, res, next) => {
     // console.log(decodedUser);
 
     if (!decodedUser) {
-      const error = new HttpError("Authentication failed!", 401);
+      const error = new HttpError("Authentication failed!!", 401);
       return next(error);
     }
 

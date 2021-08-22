@@ -39,7 +39,6 @@ const signup = async (req, res, next) => {
     password,
     createdAt: moment().unix(),
     updatedAt: moment().unix(),
-    isAdmin: true,
   });
 
   try {

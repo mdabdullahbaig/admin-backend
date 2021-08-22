@@ -1,19 +1,17 @@
+const moment = require("moment");
 const User = require("../models/user");
 const HttpError = require("../util/HttpError");
 const { updateUserSchema } = require("../util/joiSchema");
 
 const getUsers = async (req, res, next) => {
   if (!req.currentUser.isAdmin) {
-    const error = new HttpError(
-      "Fetching users failed, please try again later.",
-      500
-    );
+    const error = new HttpError("Unauthorized", 403);
     return next(error);
   }
   let users;
 
   try {
-    users = await User.find({}, "-password").exec();
+    users = await User.find({}).exec();
   } catch (err) {
     const error = new HttpError(
       "Fetching users failed, please try again later.",
@@ -22,28 +20,21 @@ const getUsers = async (req, res, next) => {
     return next(error);
   }
 
-  return res.json({
-    users: users.map((user) => user.toObject({ getters: true })),
-  });
+  return res.json(users);
 };
 
 const getUserById = async (req, res, next) => {
   const { id } = req.params;
-  console.log(req.currentUser.userId);
-  console.log(id);
 
   if (req.currentUser.userId !== id) {
-    const error = new HttpError(
-      "Could not find a user for the provided id.",
-      404
-    );
+    const error = new HttpError("Unauthorized", 403);
     return next(error);
   }
 
   let user;
 
   try {
-    user = await User.findById(id, "-password").exec();
+    user = await User.findById(id).exec();
   } catch (err) {
     const error = new HttpError(
       "Fetching user failed, please try again later.",
@@ -60,12 +51,17 @@ const getUserById = async (req, res, next) => {
     return next(error);
   }
 
-  return res.json({
-    user: user.toObject({ getters: true }),
-  });
+  return res.json(user);
 };
 
 const updateUserById = async (req, res, next) => {
+  const { id } = req.params;
+
+  if (req.currentUser.userId !== id) {
+    const error = new HttpError("Unauthorized", 403);
+    return next(error);
+  }
+
   try {
     const validateSchema = await updateUserSchema.validateAsync(req.body);
   } catch (err) {
@@ -74,15 +70,14 @@ const updateUserById = async (req, res, next) => {
   }
 
   const { firstName, lastName } = req.body;
-  const { id } = req.params;
 
   let existingUser;
 
   try {
-    existingUser = await User.findById(id, "-password").exec();
+    existingUser = await User.findById(id).exec();
   } catch (err) {
     const error = new HttpError(
-      "Signing up failed, please try again later.",
+      "Something went wrong, please try again later.1",
       500
     );
     return next(error);
@@ -98,9 +93,33 @@ const updateUserById = async (req, res, next) => {
 
   existingUser.firstName = firstName;
   existingUser.lastName = lastName;
+  existingUser.updatedAt = moment().unix();
 
   try {
     await existingUser.save();
+  } catch (err) {
+    const error = new HttpError(
+      "Something went wrong, please try again later.2",
+      500
+    );
+    return next(error);
+  }
+
+  return res.status(200).json(existingUser);
+};
+
+const deleteUserById = async (req, res, next) => {
+  const { id } = req.params;
+
+  if (!req.currentUser.isAdmin) {
+    const error = new HttpError("Unauthorized", 403);
+    return next(error);
+  }
+
+  let user;
+
+  try {
+    user = await User.findById(id).exec();
   } catch (err) {
     const error = new HttpError(
       "Something went wrong, please try again later.",
@@ -109,28 +128,9 @@ const updateUserById = async (req, res, next) => {
     return next(error);
   }
 
-  return res
-    .status(200)
-    .json({ user: existingUser.toObject({ getters: true }) });
-};
-
-const deleteUserById = async (req, res, next) => {
-  const { id } = req.params;
-  let user;
-
-  try {
-    user = await User.findById(id, "-password").exec();
-  } catch (err) {
-    const error = new HttpError(
-      "Fetching user failed, please try again later.",
-      500
-    );
-    return next(error);
-  }
-
   if (!user) {
     const error = new HttpError(
-      "Could not find a place for the provided id.",
+      "Could not find a user for the provided id.",
       404
     );
     return next(error);
